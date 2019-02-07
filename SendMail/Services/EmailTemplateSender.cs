@@ -41,20 +41,22 @@ namespace SendMail.Services
             // If email was sent successfully...
             if (response.Successful)
             {
-                // Make another clone of the original template and email
-                var toSenderTemplate = string.Copy(templateText);
+                // Make another clone of the original email
                 var toSenderEmail = EmailSenderHelper.DeepCopy(email);
 
                 // Send confirmation email to sender
-                await SendGeneralConfirmationEmailAsync(toSenderEmail, toSenderTemplate, body);
+                await SendGeneralConfirmationEmailAsync(toSenderEmail);
             }
 
             // Return response from email to receiver
             return response;
         }
 
-        public async Task SendGeneralConfirmationEmailAsync(EmailToSendModel toSenderEmail, string toSenderTemplate, string body)
+        public async Task SendGeneralConfirmationEmailAsync(EmailToSendModel toSenderEmail)
         {
+            // Sender template (No body)
+            var templateText = await ReturnTemplateFromFileAsync("SendMail.Templates.GeneralWebsiteTemplateToSender.html");
+
             // Confirmation text for sender
             var title = $"Hey {toSenderEmail.Sender.Name},<br/>Thanks for getting in touch!";
             var subtitle = "I'll try to reply as soon as I can.";
@@ -62,8 +64,11 @@ namespace SendMail.Services
             // Formatted date to FullDateTime
             var formattedDate = string.Format("{0:F}", toSenderEmail.Email.DateSent);
 
+            // New subject title for confirmation email
+            toSenderEmail.Email.Subject = "Thanks for getting in touch, " + toSenderEmail.Sender.Name + "!";
+
             // Replace variables in template with response text and set to Html body
-            toSenderEmail.Email.MessageHtml = ReplaceVariablesInTemplate(toSenderTemplate, title, subtitle, formattedDate, string.Empty);
+            toSenderEmail.Email.MessageHtml = ReplaceVariablesInTemplate(templateText, title, subtitle, formattedDate, string.Empty);
 
             // Set text message in body with confirmation text
             toSenderEmail.Email.MessageText = $"Hey {toSenderEmail.Sender.Name},\n" 
