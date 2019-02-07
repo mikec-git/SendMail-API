@@ -4,7 +4,7 @@ namespace SendMail.Models
 {
     public class EmailFromContactFormModel
     {
-        [RegularExpression(@"[\w\s]+", ErrorMessage = "Your name should only consist of letters")]
+        [RegularExpression(@"[a-zA-Z\s]+", ErrorMessage = "Your name should only consist of letters")]
         [StringLength(50, MinimumLength = 2)]
         [Required(ErrorMessage = "Please enter your name")]
         public string Name { get; set; }
